@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "verbatimModuleSyntax": false,
+    "outDir": "dist/cjs",
+    "rootDir": "src",
+    "ignoreDeprecations": "6.0"
+  },
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/bin.ts",
+    "src/cli.ts"
+  ]
+}

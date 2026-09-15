@@ -1,0 +1,61 @@
+{
+  "name": "csv-quality",
+  "version": "0.1.0",
+  "description": "Inspect a CSV before you trust it: delimiter detection, a quote-aware parser, and a quality report you can save as CSV or JSON. No dependencies.",
+  "keywords": [
+    "csv",
+    "data-quality",
+    "parser",
+    "profiling",
+    "report",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "Vugar Bakhishov",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vugarbbakhishov-hub/csv-quality.git"
+  },
+  "bugs": "https://github.com/vugarbbakhishov-hub/csv-quality/issues",
+  "homepage": "https://github.com/vugarbbakhishov-hub/csv-quality#readme",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "bin": {
+    "csv-quality": "./dist/esm/bin.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/finish-build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}
