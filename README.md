@@ -108,6 +108,11 @@ npm run typecheck
 npm run build
 ```
 
+## Contributing
+
+Bug reports and focused improvements are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
 ## License
 
 [MIT](LICENSE)

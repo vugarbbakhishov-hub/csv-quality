@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parseArgs } from './cli.js'
+import { join } from 'node:path'
+import { parseArgs, savedReportPath } from './cli.js'
 
 describe('parseArgs', () => {
   it('reads the file name and flags in any order', () => {
@@ -21,5 +22,13 @@ describe('parseArgs', () => {
     expect(() => parseArgs(['data.csv', '--out'])).toThrow('--out needs a file name')
     expect(() => parseArgs(['--nope'])).toThrow('Unknown option: --nope')
     expect(() => parseArgs(['a.csv', 'b.csv'])).toThrow('Only one input file')
+  })
+})
+
+describe('savedReportPath', () => {
+  it('writes the report beside the input file', () => {
+    expect(savedReportPath(join('exports', 'people.csv'), 'json')).toBe(
+      join('exports', 'people-report.json'),
+    )
   })
 })

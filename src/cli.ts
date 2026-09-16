@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises'
-import { basename } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { analyzeCsv } from './analyze.js'
 import { reportFileName, toCsvReport, toJsonReport } from './report.js'
 
@@ -48,6 +48,11 @@ export function parseArgs(argv: string[]): Args {
   return args
 }
 
+/** Places a saved report beside its source file. */
+export function savedReportPath(sourcePath: string, extension: 'csv' | 'json'): string {
+  return join(dirname(sourcePath), reportFileName(basename(sourcePath), extension))
+}
+
 export async function run(argv: string[]): Promise<number> {
   let args: Args
 
@@ -68,7 +73,7 @@ export async function run(argv: string[]): Promise<number> {
     const report = analyzeCsv(await readFile(args.file, 'utf8'))
     const extension = args.json ? 'json' : 'csv'
     const body = args.json ? toJsonReport(report, { source }) : toCsvReport(report, { source })
-    const target = args.out ?? (args.save ? reportFileName(source, extension) : undefined)
+    const target = args.out ?? (args.save ? savedReportPath(args.file, extension) : undefined)
 
     if (target) {
       await writeFile(target, body)

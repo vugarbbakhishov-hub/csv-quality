@@ -1,0 +1,38 @@
+name: Bug report
+description: Report a parsing, analysis, report or CLI problem.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Remove private or sensitive data from every CSV example.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the result you saw and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Minimal CSV sample
+      description: Provide the smallest anonymized input that reproduces the problem.
+      render: csv
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the Node.js version and operating system, or the browser and version.
+      placeholder: Node.js 24 on Windows 11
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed personal, financial, health and customer data from the sample.
+          required: true
