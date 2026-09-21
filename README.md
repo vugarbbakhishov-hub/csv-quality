@@ -65,13 +65,18 @@ joined,date,3,0,2,100
 | `--out <file>` | Write to this file instead of standard output |
 | `--save` | Write next to the input as `<name>-report.<ext>` |
 | `--min-completeness <0-100>` | Exit with code `1` when overall completeness is below this percent |
+| `--max-duplicate-rows <count>` | Exit with code `1` when duplicate rows exceed this count |
 | `-h`, `--help` | Show usage |
 
-Use `--min-completeness` in CI when an export should fail the job if too many
-cells are blank:
+Use the quality gate options in CI when an export should fail the job if too
+many cells are blank or if duplicate rows are not allowed:
 
 ```bash
-npx csv-quality people.csv --json --out quality-report.json --min-completeness 95
+npx csv-quality people.csv \
+  --json \
+  --out quality-report.json \
+  --min-completeness 95 \
+  --max-duplicate-rows 0
 ```
 
 The report is still written, so the failed job keeps the exact numbers that

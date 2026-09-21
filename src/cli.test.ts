@@ -25,6 +25,11 @@ describe('parseArgs', () => {
     expect(parseArgs(['data.csv', '--min-completeness', '82.5']).minCompleteness).toBe(82.5)
   })
 
+  it('reads the maximum duplicate row threshold', () => {
+    expect(parseArgs(['data.csv', '--max-duplicate-rows', '0']).maxDuplicateRows).toBe(0)
+    expect(parseArgs(['data.csv', '--max-duplicate-rows', '3']).maxDuplicateRows).toBe(3)
+  })
+
   it('rejects a missing --out value, unknown flags and a second file', () => {
     expect(() => parseArgs(['data.csv', '--out'])).toThrow('--out needs a file name')
     expect(() => parseArgs(['--nope'])).toThrow('Unknown option: --nope')
@@ -40,6 +45,18 @@ describe('parseArgs', () => {
     )
     expect(() => parseArgs(['data.csv', '--min-completeness', 'bad'])).toThrow(
       '--min-completeness must be a number',
+    )
+  })
+
+  it('rejects an invalid maximum duplicate row threshold', () => {
+    expect(() => parseArgs(['data.csv', '--max-duplicate-rows'])).toThrow(
+      '--max-duplicate-rows needs a non-negative whole number',
+    )
+    expect(() => parseArgs(['data.csv', '--max-duplicate-rows', '-1'])).toThrow(
+      '--max-duplicate-rows must be a non-negative whole number',
+    )
+    expect(() => parseArgs(['data.csv', '--max-duplicate-rows', '1.5'])).toThrow(
+      '--max-duplicate-rows must be a non-negative whole number',
     )
   })
 })
@@ -82,5 +99,23 @@ describe('run', () => {
     await rm(directory, { recursive: true, force: true })
 
     expect(exitCode).toBe(0)
+  })
+
+  it('returns a failing exit code when duplicate rows exceed the threshold', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
+    const source = join(directory, 'people.csv')
+    const target = join(directory, 'report.json')
+
+    await writeFile(source, 'name,score\nAda,10\nAda,10\nLinus,11\n')
+
+    const exitCode = await run([source, '--json', '--out', target, '--max-duplicate-rows', '0'])
+    const savedReport = JSON.parse(await readFile(target, 'utf8')) as {
+      summary: { duplicateRowCount: number }
+    }
+
+    await rm(directory, { recursive: true, force: true })
+
+    expect(exitCode).toBe(1)
+    expect(savedReport.summary.duplicateRowCount).toBe(1)
   })
 })

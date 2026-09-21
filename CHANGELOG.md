@@ -11,6 +11,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - `--min-completeness <0-100>` for using the CLI as a CI quality gate. The
   report is still written, and the command exits with code `1` when overall
   completeness is below the required percent.
+- `--max-duplicate-rows <count>` for failing a CI job when exact duplicate rows
+  exceed the allowed count.
 
 ## [0.1.0] - 2026-09-15
 

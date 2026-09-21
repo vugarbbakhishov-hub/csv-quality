@@ -14,6 +14,8 @@ Options:
   --save           Write next to the input as <name>-report.<ext>
   --min-completeness <0-100>
                    Exit with code 1 when completeness is below this percent
+  --max-duplicate-rows <count>
+                   Exit with code 1 when duplicate rows exceed this count
   -h, --help       Show this message
 `
 
@@ -23,6 +25,7 @@ interface Args {
   out?: string
   save: boolean
   minCompleteness?: number
+  maxDuplicateRows?: number
   help: boolean
 }
 
@@ -38,6 +41,10 @@ export function parseArgs(argv: string[]): Args {
     else if (value === '--min-completeness') {
       index += 1
       args.minCompleteness = parseMinCompleteness(argv[index])
+    }
+    else if (value === '--max-duplicate-rows') {
+      index += 1
+      args.maxDuplicateRows = parseMaxDuplicateRows(argv[index])
     }
     else if (value === '--out') {
       index += 1
@@ -66,6 +73,19 @@ function parseMinCompleteness(value: string | undefined): number {
   }
 
   return percent
+}
+
+function parseMaxDuplicateRows(value: string | undefined): number {
+  if (!value || value.trim() === '') {
+    throw new Error('--max-duplicate-rows needs a non-negative whole number.')
+  }
+
+  const count = Number(value)
+  if (!Number.isInteger(count) || count < 0) {
+    throw new Error('--max-duplicate-rows must be a non-negative whole number.')
+  }
+
+  return count
 }
 
 /** Places a saved report beside its source file. */
@@ -102,13 +122,25 @@ export async function run(argv: string[]): Promise<number> {
       process.stdout.write(body.endsWith('\n') ? body : `${body}\n`)
     }
 
-    if (
-      args.minCompleteness !== undefined &&
-      report.completenessPercent < args.minCompleteness
-    ) {
-      process.stderr.write(
-        `Completeness ${report.completenessPercent}% is below required ${args.minCompleteness}%.\n`,
+    const failures: string[] = []
+
+    if (args.minCompleteness !== undefined && report.completenessPercent < args.minCompleteness) {
+      failures.push(
+        `Completeness ${report.completenessPercent}% is below required ${args.minCompleteness}%.`,
       )
+    }
+
+    if (
+      args.maxDuplicateRows !== undefined &&
+      report.duplicateRowCount > args.maxDuplicateRows
+    ) {
+      failures.push(
+        `Duplicate rows ${report.duplicateRowCount} exceed allowed ${args.maxDuplicateRows}.`,
+      )
+    }
+
+    if (failures.length > 0) {
+      process.stderr.write(`${failures.join('\n')}\n`)
       return 1
     }
 
