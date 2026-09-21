@@ -64,7 +64,18 @@ joined,date,3,0,2,100
 | `--json` | Write the report as JSON instead of CSV |
 | `--out <file>` | Write to this file instead of standard output |
 | `--save` | Write next to the input as `<name>-report.<ext>` |
+| `--min-completeness <0-100>` | Exit with code `1` when overall completeness is below this percent |
 | `-h`, `--help` | Show usage |
+
+Use `--min-completeness` in CI when an export should fail the job if too many
+cells are blank:
+
+```bash
+npx csv-quality people.csv --json --out quality-report.json --min-completeness 95
+```
+
+The report is still written, so the failed job keeps the exact numbers that
+explain why the CSV did not pass.
 
 ## API
 

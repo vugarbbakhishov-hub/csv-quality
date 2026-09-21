@@ -12,6 +12,8 @@ Options:
   --json           Write the report as JSON instead of CSV
   --out <file>     Write to this file instead of standard output
   --save           Write next to the input as <name>-report.<ext>
+  --min-completeness <0-100>
+                   Exit with code 1 when completeness is below this percent
   -h, --help       Show this message
 `
 
@@ -20,6 +22,7 @@ interface Args {
   json: boolean
   out?: string
   save: boolean
+  minCompleteness?: number
   help: boolean
 }
 
@@ -32,6 +35,10 @@ export function parseArgs(argv: string[]): Args {
     if (value === '--json') args.json = true
     else if (value === '--save') args.save = true
     else if (value === '-h' || value === '--help') args.help = true
+    else if (value === '--min-completeness') {
+      index += 1
+      args.minCompleteness = parseMinCompleteness(argv[index])
+    }
     else if (value === '--out') {
       index += 1
       args.out = argv[index]
@@ -46,6 +53,19 @@ export function parseArgs(argv: string[]): Args {
   }
 
   return args
+}
+
+function parseMinCompleteness(value: string | undefined): number {
+  if (!value || value.trim() === '') {
+    throw new Error('--min-completeness needs a percent from 0 to 100.')
+  }
+
+  const percent = Number(value)
+  if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+    throw new Error('--min-completeness must be a number from 0 to 100.')
+  }
+
+  return percent
 }
 
 /** Places a saved report beside its source file. */
@@ -80,6 +100,16 @@ export async function run(argv: string[]): Promise<number> {
       process.stdout.write(`Wrote ${target}\n`)
     } else {
       process.stdout.write(body.endsWith('\n') ? body : `${body}\n`)
+    }
+
+    if (
+      args.minCompleteness !== undefined &&
+      report.completenessPercent < args.minCompleteness
+    ) {
+      process.stderr.write(
+        `Completeness ${report.completenessPercent}% is below required ${args.minCompleteness}%.\n`,
+      )
+      return 1
     }
 
     return 0

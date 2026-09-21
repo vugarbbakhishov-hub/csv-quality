@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `--min-completeness <0-100>` for using the CLI as a CI quality gate. The
+  report is still written, and the command exits with code `1` when overall
+  completeness is below the required percent.
+
 ## [0.1.0] - 2026-09-15
 
 ### Added
