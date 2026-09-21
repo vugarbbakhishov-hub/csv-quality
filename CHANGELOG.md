@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-09-21
 
 ### Added
 
@@ -36,3 +36,5 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   the input path points to another directory.
 - The clean step uses Node's file system API so the build works consistently
   on Windows, macOS and Linux.
+
+[0.2.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.2.0
