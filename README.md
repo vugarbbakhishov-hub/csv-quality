@@ -1,6 +1,6 @@
 # csv-quality
 
-Inspect a CSV before you trust it. `csv-quality` reads the file, tells you how many rows and columns it holds, how many cells are blank, which rows repeat, and what each column looks like — then writes that as a report you can save or send on.
+Inspect a CSV before you trust it. `csv-quality` reads the file, tells you how many rows and columns it holds, how many cells are blank, which rows repeat, and what each column looks like — then writes a CSV, JSON, or Markdown report you can save or send on.
 
 No dependencies. Works in Node and in the browser. Ships a command-line tool.
 
@@ -62,6 +62,7 @@ joined,date,3,0,2,100
 | Option | What it does |
 | --- | --- |
 | `--json` | Write the report as JSON instead of CSV |
+| `--markdown` | Write a Markdown report for pull requests or CI summaries |
 | `--out <file>` | Write to this file instead of standard output |
 | `--save` | Write next to the input as `<name>-report.<ext>` |
 | `--min-completeness <0-100>` | Exit with code `1` when overall completeness is below this percent |
@@ -81,6 +82,12 @@ npx csv-quality people.csv \
 
 The report is still written, so the failed job keeps the exact numbers that
 explain why the CSV did not pass.
+
+Send the Markdown report straight to a GitHub Actions job summary:
+
+```bash
+npx csv-quality people.csv --markdown >> "$GITHUB_STEP_SUMMARY"
+```
 
 ## API
 
@@ -110,11 +117,11 @@ Return a `CsvQualityReport`:
 
 `type` is one of `number`, `date`, `boolean`, `text` or `empty`, and is decided conservatively: every non-blank value in the column has to fit, otherwise the column is `text`.
 
-### `toCsvReport(report, meta?)` and `toJsonReport(report, meta?)`
+### `toCsvReport(report, meta?)`, `toJsonReport(report, meta?)` and `toMarkdownReport(report, meta?)`
 
-Render the report. The CSV form is a summary block, a blank line, then one row per column — it opens directly in a spreadsheet. The JSON form carries the same numbers in a nested shape and is easier to read from a script. `meta` takes `source` and `generatedAt`.
+Render the report. The CSV form is a summary block, a blank line, then one row per column — it opens directly in a spreadsheet. The JSON form carries the same numbers in a nested shape and is easier to read from a script. The Markdown form includes a compact summary and a GitHub-flavored table for pull requests and CI job summaries. `meta` takes `source` and `generatedAt`.
 
-### `reportFileName(source, 'csv' | 'json')`
+### `reportFileName(source, 'csv' | 'json' | 'md')`
 
 `people.csv` → `people-report.csv`. Strips characters that are awkward in file names.
 

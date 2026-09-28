@@ -1,7 +1,7 @@
 {
   "name": "csv-quality",
   "version": "0.2.0",
-  "description": "Inspect a CSV before you trust it: delimiter detection, a quote-aware parser, and a quality report you can save as CSV or JSON. No dependencies.",
+  "description": "Inspect a CSV before you trust it: delimiter detection, a quote-aware parser, and CSV, JSON, or Markdown quality reports. No dependencies.",
   "keywords": [
     "csv",
     "data-quality",

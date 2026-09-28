@@ -90,8 +90,47 @@ export function toJsonReport(report: CsvQualityReport, meta: ReportMeta = {}): s
   )}\n`
 }
 
+/** Escapes text that could change a Markdown table cell or inline value. */
+export function escapeMarkdownValue(value: string | number): string {
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\r?\n/g, ' ')
+    .replace(/\|/g, '\\|')
+    .replace(/([*_`\[\]<>])/g, '\\$1')
+}
+
+/** Renders a GitHub-flavored Markdown summary and column profile. */
+export function toMarkdownReport(report: CsvQualityReport, meta: ReportMeta = {}): string {
+  const { source, generatedAt } = resolve(meta)
+
+  const columns = report.columns.map(
+    (column) =>
+      `| ${escapeMarkdownValue(column.name)} | ${column.type} | ${column.filled} | ${column.empty} | ${column.unique} | ${column.fillRatePercent}% |`,
+  )
+
+  return [
+    '# CSV quality report',
+    '',
+    `- **Source:** ${escapeMarkdownValue(source)}`,
+    `- **Generated:** ${generatedAt}`,
+    `- **Delimiter:** ${delimiterNames[report.delimiter]}`,
+    `- **Data rows:** ${report.rowCount}`,
+    `- **Columns:** ${report.columnCount}`,
+    `- **Empty cells:** ${report.emptyCellCount}`,
+    `- **Duplicate rows:** ${report.duplicateRowCount}`,
+    `- **Completeness:** ${report.completenessPercent}%`,
+    '',
+    '## Columns',
+    '',
+    '| Column | Type | Filled | Empty | Unique | Fill rate |',
+    '| --- | --- | ---: | ---: | ---: | ---: |',
+    ...columns,
+    '',
+  ].join('\n')
+}
+
 /** Turns a source file name into a safe report file name. */
-export function reportFileName(source: string, extension: 'csv' | 'json'): string {
+export function reportFileName(source: string, extension: 'csv' | 'json' | 'md'): string {
   const base = source.replace(/\.[^./\\]+$/, '')
   const safe = base.replace(/[^\w.-]+/g, '-').replace(/^[-.]+|[-.]+$/g, '')
   return `${safe || 'csv'}-report.${extension}`

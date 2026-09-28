@@ -9,6 +9,7 @@ describe('parseArgs', () => {
     expect(parseArgs(['data.csv', '--json'])).toEqual({
       file: 'data.csv',
       json: true,
+      markdown: false,
       save: false,
       help: false,
     })
@@ -18,6 +19,13 @@ describe('parseArgs', () => {
 
   it('reads the value after --out', () => {
     expect(parseArgs(['data.csv', '--out', 'report.csv']).out).toBe('report.csv')
+  })
+
+  it('selects Markdown output and rejects two output formats', () => {
+    expect(parseArgs(['data.csv', '--markdown']).markdown).toBe(true)
+    expect(() => parseArgs(['data.csv', '--json', '--markdown'])).toThrow(
+      'Choose either --json or --markdown, not both.',
+    )
   })
 
   it('reads the minimum completeness threshold', () => {
@@ -66,10 +74,30 @@ describe('savedReportPath', () => {
     expect(savedReportPath(join('exports', 'people.csv'), 'json')).toBe(
       join('exports', 'people-report.json'),
     )
+    expect(savedReportPath(join('exports', 'people.csv'), 'md')).toBe(
+      join('exports', 'people-report.md'),
+    )
   })
 })
 
 describe('run', () => {
+  it('writes a Markdown report to a chosen file', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
+    const source = join(directory, 'people.csv')
+    const target = join(directory, 'summary.md')
+
+    await writeFile(source, 'name,score\nAda,10\nLinus,\n')
+
+    const exitCode = await run([source, '--markdown', '--out', target])
+    const savedReport = await readFile(target, 'utf8')
+
+    await rm(directory, { recursive: true, force: true })
+
+    expect(exitCode).toBe(0)
+    expect(savedReport).toContain('# CSV quality report')
+    expect(savedReport).toContain('| score | number | 1 | 1 | 1 | 50% |')
+  })
+
   it('returns a failing exit code when completeness is below the threshold', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
     const source = join(directory, 'people.csv')

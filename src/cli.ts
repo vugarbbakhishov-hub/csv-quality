@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { analyzeCsv } from './analyze.js'
-import { reportFileName, toCsvReport, toJsonReport } from './report.js'
+import { reportFileName, toCsvReport, toJsonReport, toMarkdownReport } from './report.js'
 
 const usage = `csv-quality — inspect a CSV before you trust it
 
@@ -10,6 +10,7 @@ Usage:
 
 Options:
   --json           Write the report as JSON instead of CSV
+  --markdown       Write a Markdown report for pull requests or CI summaries
   --out <file>     Write to this file instead of standard output
   --save           Write next to the input as <name>-report.<ext>
   --min-completeness <0-100>
@@ -22,6 +23,7 @@ Options:
 interface Args {
   file?: string
   json: boolean
+  markdown: boolean
   out?: string
   save: boolean
   minCompleteness?: number
@@ -30,12 +32,13 @@ interface Args {
 }
 
 export function parseArgs(argv: string[]): Args {
-  const args: Args = { json: false, save: false, help: false }
+  const args: Args = { json: false, markdown: false, save: false, help: false }
 
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index]
 
     if (value === '--json') args.json = true
+    else if (value === '--markdown') args.markdown = true
     else if (value === '--save') args.save = true
     else if (value === '-h' || value === '--help') args.help = true
     else if (value === '--min-completeness') {
@@ -57,6 +60,10 @@ export function parseArgs(argv: string[]): Args {
     } else {
       throw new Error('Only one input file is supported.')
     }
+  }
+
+  if (args.json && args.markdown) {
+    throw new Error('Choose either --json or --markdown, not both.')
   }
 
   return args
@@ -89,7 +96,7 @@ function parseMaxDuplicateRows(value: string | undefined): number {
 }
 
 /** Places a saved report beside its source file. */
-export function savedReportPath(sourcePath: string, extension: 'csv' | 'json'): string {
+export function savedReportPath(sourcePath: string, extension: 'csv' | 'json' | 'md'): string {
   return join(dirname(sourcePath), reportFileName(basename(sourcePath), extension))
 }
 
@@ -111,8 +118,12 @@ export async function run(argv: string[]): Promise<number> {
   try {
     const source = basename(args.file)
     const report = analyzeCsv(await readFile(args.file, 'utf8'))
-    const extension = args.json ? 'json' : 'csv'
-    const body = args.json ? toJsonReport(report, { source }) : toCsvReport(report, { source })
+    const extension = args.json ? 'json' : args.markdown ? 'md' : 'csv'
+    const body = args.json
+      ? toJsonReport(report, { source })
+      : args.markdown
+        ? toMarkdownReport(report, { source })
+        : toCsvReport(report, { source })
     const target = args.out ?? (args.save ? savedReportPath(args.file, extension) : undefined)
 
     if (target) {

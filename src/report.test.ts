@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { analyzeCsv } from './analyze.js'
-import { escapeCsvValue, reportFileName, toCsvReport, toJsonReport } from './report.js'
+import {
+  escapeCsvValue,
+  escapeMarkdownValue,
+  reportFileName,
+  toCsvReport,
+  toJsonReport,
+  toMarkdownReport,
+} from './report.js'
 
 const report = analyzeCsv('name,score,active\nAda,10,true\nAda,10,true\nLinus,,false')
 const meta = { source: 'people.csv', generatedAt: '2026-09-15T08:00:00.000Z' }
@@ -61,10 +68,33 @@ describe('toJsonReport', () => {
   })
 })
 
+describe('toMarkdownReport', () => {
+  it('writes a summary and a GitHub-flavored column table', () => {
+    const markdown = toMarkdownReport(report, meta)
+
+    expect(markdown).toContain('# CSV quality report')
+    expect(markdown).toContain('- **Source:** people.csv')
+    expect(markdown).toContain('- **Completeness:** 89%')
+    expect(markdown).toContain('| Column | Type | Filled | Empty | Unique | Fill rate |')
+    expect(markdown).toContain('| score | number | 2 | 1 | 1 | 67% |')
+    expect(markdown.endsWith('\n')).toBe(true)
+  })
+
+  it('keeps special column names inside one table cell', () => {
+    const tricky = analyzeCsv('"team|name",score\nCore,10')
+
+    expect(toMarkdownReport(tricky, meta)).toContain(
+      '| team\\|name | text | 1 | 0 | 1 | 100% |',
+    )
+    expect(escapeMarkdownValue('line 1\nline 2')).toBe('line 1 line 2')
+  })
+})
+
 describe('reportFileName', () => {
   it('reuses the source name and drops unsafe characters', () => {
     expect(reportFileName('people.csv', 'csv')).toBe('people-report.csv')
     expect(reportFileName('Q3 sales (final).csv', 'json')).toBe('Q3-sales-final-report.json')
+    expect(reportFileName('people.csv', 'md')).toBe('people-report.md')
     expect(reportFileName('   ', 'json')).toBe('csv-report.json')
   })
 })
