@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-09-29
 
 ### Added
 
@@ -45,4 +45,4 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   on Windows, macOS and Linux.
 
 [0.2.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.2.0
-[Unreleased]: https://github.com/vugarbbakhishov-hub/csv-quality/compare/v0.2.0...HEAD
+[0.3.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.3.0
