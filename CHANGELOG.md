@@ -12,6 +12,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   gates and `--out`. `--save` requires a file and is rejected for stdin.
 - A runnable export example exercised in CI with a Markdown job summary.
 
+### Fixed
+
+- Preserve records containing only empty cells (such as `,` or `""`) so
+  completeness gates, row counts and duplicate counts include missing data.
+  Entirely empty headers now receive generated names instead of causing the
+  first data row to be treated as a header. Blank lines are still skipped.
+
 ## [0.3.0] - 2026-09-29
 
 ### Added

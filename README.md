@@ -122,6 +122,11 @@ Options: `delimiter` skips detection, `preserveWhitespace` keeps padding inside 
 
 Throws `SyntaxError` on empty input or an unclosed quoted field.
 
+On the development branch, explicit empty records such as `,` or `""` are
+preserved and included in completeness and duplicate counts. Plain blank
+lines are skipped. For example, `name,score\nAda,10\n,` has two data rows
+and 50% completeness. This correction is not included in v0.3.0.
+
 ### `detectDelimiter(input)`
 
 Returns `,`, `;`, `\t` or `|` — whichever appears most often in the first line outside quotes. Falls back to a comma.

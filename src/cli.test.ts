@@ -90,6 +90,18 @@ describe('savedReportPath', () => {
 })
 
 describe('run', () => {
+  it('fails a completeness gate when an explicit empty record is present', async () => {
+    const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+    vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+    const input = Readable.from(['name,score\nAda,10\n,\n,\n'])
+
+    expect(await run(['-', '--json', '--min-completeness', '90'], input)).toBe(1)
+    const report = JSON.parse(stdout.mock.calls.map(([chunk]) => String(chunk)).join(''))
+    expect(report.summary).toMatchObject({
+      rowCount: 3, emptyCellCount: 4, duplicateRowCount: 1, completenessPercent: 33,
+    })
+  })
+
   it('reads a UTF-8 character split across stdin chunks', async () => {
     const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
     const bytes = Buffer.from('şəhər,score\nBakı,10\n')

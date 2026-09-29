@@ -65,18 +65,22 @@ function readRows(input: string, delimiter: Delimiter, preserveWhitespace: boole
   let row: string[] = []
   let cell = ''
   let inQuotes = false
+  let hasRecordSyntax = false
 
   const pushRow = () => {
     row.push(finish(cell))
-    if (row.some((value) => value.length > 0)) rows.push(row)
+    // Delimiters and quotes describe cells even when every value is empty.
+    if (hasRecordSyntax || row.some((value) => value.length > 0)) rows.push(row)
     row = []
     cell = ''
+    hasRecordSyntax = false
   }
 
   for (let index = 0; index < source.length; index += 1) {
     const character = source[index]
 
     if (character === '"') {
+      hasRecordSyntax = true
       if (inQuotes && source[index + 1] === '"') {
         cell += '"'
         index += 1
@@ -84,6 +88,7 @@ function readRows(input: string, delimiter: Delimiter, preserveWhitespace: boole
         inQuotes = !inQuotes
       }
     } else if (character === delimiter && !inQuotes) {
+      hasRecordSyntax = true
       row.push(finish(cell))
       cell = ''
     } else if ((character === '\n' || character === '\r') && !inQuotes) {

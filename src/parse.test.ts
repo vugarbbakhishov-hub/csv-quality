@@ -65,4 +65,19 @@ describe('parseCsv', () => {
     expect(() => parseCsv('   ')).toThrow(SyntaxError)
     expect(() => parseCsv('name,note\nAda,"unfinished')).toThrow('inside a quoted field')
   })
+
+  it.each([',', ';', '\t', '|'] as const)('keeps explicit empty records with %s separators', (delimiter) => {
+    const dataset = parseCsv(`name${delimiter}score\nAda${delimiter}10\n${delimiter}\n`)
+    expect(dataset.rows).toEqual([['Ada', '10'], ['', '']])
+  })
+
+  it('retains quoted empty single-column records while ignoring blank lines', () => {
+    expect(parseCsv('name\r\n\r\n""\r\n   \r\nAda\r\n').rows).toEqual([[''], ['Ada']])
+  })
+
+  it('keeps an all-empty header instead of promoting the first data row', () => {
+    const dataset = parseCsv(',\nAda,10\n')
+    expect(dataset.headers).toEqual(['Column 1', 'Column 2'])
+    expect(dataset.rows).toEqual([['Ada', '10']])
+  })
 })
