@@ -19,6 +19,14 @@ describe('detectDelimiter', () => {
 })
 
 describe('parseCsv', () => {
+  it('handles many short rows and a wider final row without an argument-limit error', () => {
+    const dataset = parseCsv(`name,score\n${'Ada,10\n'.repeat(150_000)}Linus,11,extra`)
+    expect(dataset.rows).toHaveLength(150_001)
+    expect(dataset.headers).toEqual(['name', 'score', 'Column 3'])
+    expect(dataset.rows[0]).toEqual(['Ada', '10', ''])
+    expect(dataset.rows.at(-1)).toEqual(['Linus', '11', 'extra'])
+  })
+
   it('handles quoted delimiters, escaped quotes and CRLF', () => {
     const dataset = parseCsv('name,note\r\nAda,"Hello, ""CSV"""\r\nLinus,Simple')
 

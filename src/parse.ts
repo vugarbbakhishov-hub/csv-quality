@@ -132,7 +132,8 @@ export function parseCsv(input: string, options: ParseOptions = {}): CsvDataset 
   const parsed = readRows(input, delimiter, options.preserveWhitespace ?? false)
   if (parsed.length === 0) throw new SyntaxError('The CSV contains no rows.')
 
-  const width = Math.max(...parsed.map((row) => row.length))
+  let width = 0
+  for (const row of parsed) width = Math.max(width, row.length)
   const used = new Set<string>()
   const headers = Array.from({ length: width }, (_, index) =>
     uniqueHeader(parsed[0]?.[index] ?? '', index, used),

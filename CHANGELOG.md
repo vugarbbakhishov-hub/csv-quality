@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Calculate column width without spreading all rows into function arguments.
+  CSV files with many short records no longer hit the JavaScript argument
+  limit. A 150,001-row regression case also verifies padding when the final
+  row is wider than the header. Input is still buffered in memory.
+
 ## [0.4.0] - 2026-09-29
 
 ### Added
