@@ -7,12 +7,12 @@ No dependencies. Works in Node and in the browser. Ships a command-line tool.
 ## Install
 
 The package has not been published to the npm registry yet. Download
-`csv-quality-0.3.0.tgz` from the
-[v0.3.0 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.3.0),
+`csv-quality-0.4.0.tgz` from the
+[v0.4.0 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.0),
 then install that verified package locally:
 
 ```bash
-npm install ./csv-quality-0.3.0.tgz
+npm install ./csv-quality-0.4.0.tgz
 ```
 
 The commands below use this locally installed package. Registry publication
@@ -88,12 +88,10 @@ Send the Markdown report straight to a GitHub Actions job summary:
 npx csv-quality people.csv --markdown >> "$GITHUB_STEP_SUMMARY"
 ```
 
-## API
+### Piped input
 
-### Piped input (development version)
-
-The `main` branch also accepts `-` to read UTF-8 CSV from standard input.
-This feature is not included in the v0.3.0 package yet. From a source checkout:
+Use `-` to read UTF-8 CSV from standard input (available since v0.4.0).
+For a runnable example from a source checkout:
 
 ```bash
 npm ci
@@ -114,6 +112,8 @@ the Markdown result to each GitHub Actions job summary:
 node examples/export-people.mjs | node dist/esm/bin.js - --markdown --min-completeness 100 --max-duplicate-rows 0 >> "$GITHUB_STEP_SUMMARY"
 ```
 
+## API
+
 ### `parseCsv(input, options?)`
 
 Reads CSV text into `{ headers, rows, delimiter }`. Handles quoted delimiters, escaped quotes, line breaks inside quoted fields, CRLF line endings and a leading byte order mark. Short rows are padded; blank or repeated header names are made unique (`name`, `name 2`, `Column 3`).
@@ -122,10 +122,10 @@ Options: `delimiter` skips detection, `preserveWhitespace` keeps padding inside 
 
 Throws `SyntaxError` on empty input or an unclosed quoted field.
 
-On the development branch, explicit empty records such as `,` or `""` are
+Since v0.4.0, explicit empty records such as `,` or `""` are
 preserved and included in completeness and duplicate counts. Plain blank
 lines are skipped. For example, `name,score\nAda,10\n,` has two data rows
-and 50% completeness. This correction is not included in v0.3.0.
+and 50% completeness.
 
 ### `detectDelimiter(input)`
 
