@@ -129,7 +129,7 @@ and 50% completeness.
 
 ### `detectDelimiter(input)`
 
-Returns `,`, `;`, `\t` or `|` — whichever appears most often in the first line outside quotes. Falls back to a comma.
+Returns `,`, `;`, `\t` or `|` — whichever appears most often outside quotes in the header. Falls back to a comma. On the development branch, detection skips leading blank lines and reads the complete header record, including line breaks inside quoted column names.
 
 ### `analyzeCsv(input)` and `analyzeDataset(dataset)`
 

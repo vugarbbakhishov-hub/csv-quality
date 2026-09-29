@@ -8,6 +8,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Detect delimiters from the first nonblank logical record, including quoted
+  multiline headers, escaped quotes, CR-only newlines and a leading BOM.
+
 - Calculate column width without spreading all rows into function arguments.
   CSV files with many short records no longer hit the JavaScript argument
   limit. A 150,001-row regression case also verifies padding when the final
