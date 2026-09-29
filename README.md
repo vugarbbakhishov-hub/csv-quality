@@ -7,12 +7,12 @@ No dependencies. Works in Node and in the browser. Ships a command-line tool.
 ## Install
 
 The package has not been published to the npm registry yet. Download
-`csv-quality-0.4.0.tgz` from the
-[v0.4.0 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.0),
+`csv-quality-0.4.1.tgz` from the
+[v0.4.1 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.1),
 then install that verified package locally:
 
 ```bash
-npm install ./csv-quality-0.4.0.tgz
+npm install ./csv-quality-0.4.1.tgz
 ```
 
 The commands below use this locally installed package. Registry publication
@@ -129,7 +129,7 @@ and 50% completeness.
 
 ### `detectDelimiter(input)`
 
-Returns `,`, `;`, `\t` or `|` — whichever appears most often outside quotes in the header. Falls back to a comma. On the development branch, detection skips leading blank lines and reads the complete header record, including line breaks inside quoted column names.
+Returns `,`, `;`, `\t` or `|` — whichever appears most often outside quotes in the header. Falls back to a comma. Since v0.4.1, detection skips leading blank lines and reads the complete header record, including line breaks inside quoted column names.
 
 ### `analyzeCsv(input)` and `analyzeDataset(dataset)`
 
