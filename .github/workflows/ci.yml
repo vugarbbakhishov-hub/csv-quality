@@ -32,3 +32,8 @@ jobs:
       - run: npm test
 
       - run: npm run build
+
+      - name: Analyze a piped export and write the job summary
+        shell: bash
+        run: |
+          node examples/export-people.mjs | node dist/esm/bin.js - --markdown --min-completeness 100 --max-duplicate-rows 0 >> "$GITHUB_STEP_SUMMARY"

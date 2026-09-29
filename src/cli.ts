@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
+import { Readable } from 'node:stream'
 import { analyzeCsv } from './analyze.js'
 import { reportFileName, toCsvReport, toJsonReport, toMarkdownReport } from './report.js'
 
@@ -7,6 +8,7 @@ const usage = `csv-quality — inspect a CSV before you trust it
 
 Usage:
   csv-quality <file.csv> [options]
+  csv-quality - [options]          Read CSV from standard input
 
 Options:
   --json           Write the report as JSON instead of CSV
@@ -53,7 +55,7 @@ export function parseArgs(argv: string[]): Args {
       index += 1
       args.out = argv[index]
       if (!args.out) throw new Error('--out needs a file name.')
-    } else if (value.startsWith('-')) {
+    } else if (value !== '-' && value.startsWith('-')) {
       throw new Error(`Unknown option: ${value}`)
     } else if (!args.file) {
       args.file = value
@@ -64,6 +66,10 @@ export function parseArgs(argv: string[]): Args {
 
   if (args.json && args.markdown) {
     throw new Error('Choose either --json or --markdown, not both.')
+  }
+
+  if (args.file === '-' && args.save) {
+    throw new Error('--save requires an input file. Use --out for standard input.')
   }
 
   return args
@@ -100,7 +106,14 @@ export function savedReportPath(sourcePath: string, extension: 'csv' | 'json' | 
   return join(dirname(sourcePath), reportFileName(basename(sourcePath), extension))
 }
 
-export async function run(argv: string[]): Promise<number> {
+async function readStandardInput(input: Readable): Promise<string> {
+  input.setEncoding('utf8')
+  let text = ''
+  for await (const chunk of input) text += chunk
+  return text
+}
+
+export async function run(argv: string[], input: Readable = process.stdin): Promise<number> {
   let args: Args
 
   try {
@@ -116,8 +129,11 @@ export async function run(argv: string[]): Promise<number> {
   }
 
   try {
-    const source = basename(args.file)
-    const report = analyzeCsv(await readFile(args.file, 'utf8'))
+    const source = args.file === '-' ? 'stdin' : basename(args.file)
+    const csv = args.file === '-'
+      ? await readStandardInput(input)
+      : await readFile(args.file, 'utf8')
+    const report = analyzeCsv(csv)
     const extension = args.json ? 'json' : args.markdown ? 'md' : 'csv'
     const body = args.json
       ? toJsonReport(report, { source })

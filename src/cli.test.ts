@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { Readable } from 'node:stream'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseArgs, run, savedReportPath } from './cli.js'
+
+afterEach(() => vi.restoreAllMocks())
 
 describe('parseArgs', () => {
   it('reads the file name and flags in any order', () => {
@@ -19,6 +22,12 @@ describe('parseArgs', () => {
 
   it('reads the value after --out', () => {
     expect(parseArgs(['data.csv', '--out', 'report.csv']).out).toBe('report.csv')
+  })
+
+  it('accepts an explicit stdin input but refuses an implicit save location', () => {
+    expect(parseArgs(['-', '--markdown']).file).toBe('-')
+    expect(() => parseArgs(['-', '--save'])).toThrow('--save requires an input file')
+    expect(() => parseArgs(['-', 'people.csv'])).toThrow('Only one input file')
   })
 
   it('selects Markdown output and rejects two output formats', () => {
@@ -81,6 +90,59 @@ describe('savedReportPath', () => {
 })
 
 describe('run', () => {
+  it('reads a UTF-8 character split across stdin chunks', async () => {
+    const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+    const bytes = Buffer.from('şəhər,score\nBakı,10\n')
+    const input = Readable.from([bytes.subarray(0, 1), bytes.subarray(1)])
+
+    expect(await run(['-', '--json'], input)).toBe(0)
+    const report = JSON.parse(stdout.mock.calls.map(([chunk]) => String(chunk)).join(''))
+    expect(report.source).toBe('stdin')
+    expect(report.summary.rowCount).toBe(1)
+    expect(report.columns[0].name).toBe('şəhər')
+  })
+
+  it('writes the stdin report even when a quality gate fails', async () => {
+    const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+    const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+    const input = Readable.from(['name,score\nAda,10\nLinus,\n'])
+
+    expect(await run(['-', '--markdown', '--min-completeness', '90'], input)).toBe(1)
+    expect(stdout.mock.calls.map(([chunk]) => String(chunk)).join('')).toContain(
+      '**Completeness:** 75%',
+    )
+    expect(stderr).toHaveBeenCalledWith('Completeness 75% is below required 90%.\n')
+  })
+
+  it('reports an empty stdin as an error', async () => {
+    const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+    const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+
+    expect(await run(['-'], Readable.from([]))).toBe(1)
+    expect(stdout).not.toHaveBeenCalled()
+    expect(stderr).toHaveBeenCalled()
+  })
+
+  it('reports stdin read failures instead of throwing', async () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+    const input = new Readable({ read() { this.destroy(new Error('Input stream failed')) } })
+
+    expect(await run(['-'], input)).toBe(1)
+    expect(stderr).toHaveBeenCalledWith('Input stream failed\n')
+  })
+
+  it('writes stdin to an explicit output path', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
+    try {
+      const target = join(directory, 'summary.md')
+      const input = Readable.from(['name,score\nAda,10\n'])
+      expect(await run(['-', '--markdown', '--out', target], input)).toBe(0)
+      expect(await readFile(target, 'utf8')).toContain('- **Source:** stdin')
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   it('writes a Markdown report to a chosen file', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
     const source = join(directory, 'people.csv')

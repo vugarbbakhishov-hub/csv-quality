@@ -90,6 +90,30 @@ npx csv-quality people.csv --markdown >> "$GITHUB_STEP_SUMMARY"
 
 ## API
 
+### Piped input (development version)
+
+The `main` branch also accepts `-` to read UTF-8 CSV from standard input.
+This feature is not included in the v0.3.0 package yet. From a source checkout:
+
+```bash
+npm ci
+npm run build
+node examples/export-people.mjs | node dist/esm/bin.js - --markdown
+```
+
+Use `--out report.md` to save piped output. `--save` requires a file input
+and is rejected with `-`. Reports label piped input as `stdin`. Input is
+buffered in memory, just like file input; this is not a streaming parser.
+Quality gates work with pipes and still write the report before returning a
+failure exit code. An empty stream returns an error.
+
+The repository's CI runs the sample export on Node 20, 22 and 24 and appends
+the Markdown result to each GitHub Actions job summary:
+
+```bash
+node examples/export-people.mjs | node dist/esm/bin.js - --markdown --min-completeness 100 --max-duplicate-rows 0 >> "$GITHUB_STEP_SUMMARY"
+```
+
 ### `parseCsv(input, options?)`
 
 Reads CSV text into `{ headers, rows, delimiter }`. Handles quoted delimiters, escaped quotes, line breaks inside quoted fields, CRLF line endings and a leading byte order mark. Short rows are padded; blank or repeated header names are made unique (`name`, `name 2`, `Column 3`).
