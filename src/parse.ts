@@ -84,6 +84,7 @@ function readRows(input: string, delimiter: Delimiter, preserveWhitespace: boole
   let row: string[] = []
   let cell = ''
   let inQuotes = false
+  let closedQuote = false
   let hasRecordSyntax = false
 
   const pushRow = () => {
@@ -92,6 +93,7 @@ function readRows(input: string, delimiter: Delimiter, preserveWhitespace: boole
     if (hasRecordSyntax || row.some((value) => value.length > 0)) rows.push(row)
     row = []
     cell = ''
+    closedQuote = false
     hasRecordSyntax = false
   }
 
@@ -103,17 +105,27 @@ function readRows(input: string, delimiter: Delimiter, preserveWhitespace: boole
       if (inQuotes && source[index + 1] === '"') {
         cell += '"'
         index += 1
+      } else if (inQuotes) {
+        inQuotes = false
+        closedQuote = true
       } else {
-        inQuotes = !inQuotes
+        if (closedQuote || cell.trim().length > 0) {
+          throw new SyntaxError(`Unexpected quote at character ${index + 1}.`)
+        }
+        inQuotes = true
       }
     } else if (character === delimiter && !inQuotes) {
       hasRecordSyntax = true
       row.push(finish(cell))
       cell = ''
+      closedQuote = false
     } else if ((character === '\n' || character === '\r') && !inQuotes) {
       if (character === '\r' && source[index + 1] === '\n') index += 1
       pushRow()
     } else {
+      if (closedQuote && character !== ' ' && character !== '\t') {
+        throw new SyntaxError(`Unexpected text after closing quote at character ${index + 1}.`)
+      }
       cell += character
     }
   }
@@ -142,7 +154,7 @@ function uniqueHeader(name: string, index: number, used: Set<string>): string {
  * Reads CSV text into headers and rows. Handles quoted delimiters, escaped
  * quotes, line breaks inside quoted fields, CRLF, and a leading BOM.
  *
- * @throws {SyntaxError} when the input is empty or a quoted field is unclosed.
+ * @throws {SyntaxError} when input is empty or field quoting is malformed.
  */
 export function parseCsv(input: string, options: ParseOptions = {}): CsvDataset {
   if (!input.trim()) throw new SyntaxError('The CSV input is empty.')

@@ -6,6 +6,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Fixed
+
+- Reject quotes inside unquoted text and non-whitespace text after a closing
+  quote instead of silently joining fragments. Errors identify the character
+  position. Spaces/tabs around quoted fields remain supported.
+
 ## [0.4.2] - 2026-10-08
 
 ### Fixed

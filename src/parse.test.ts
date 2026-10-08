@@ -35,6 +35,16 @@ describe('detectDelimiter', () => {
 })
 
 describe('parseCsv', () => {
+  it.each(['ab"cd"', '"abc"tail', '"abc" "def"'])('rejects malformed field %s instead of silently joining text', (field) => {
+    expect(() => parseCsv(`name\n${field}`)).toThrow(SyntaxError)
+  })
+
+  it.each([',', ';', '\t', '|'] as const)('retains quoted fields and surrounding spaces with %s separators', (delimiter) => {
+    const input = `a${delimiter}b\n "one" ${delimiter}"two"\n"three"${delimiter}"four"`
+    expect(parseCsv(input).rows).toEqual([['one', 'two'], ['three', 'four']])
+    expect(parseCsv(input, { preserveWhitespace: true }).rows[0]).toEqual([' one ', 'two'])
+  })
+
   it('handles many short rows and a wider final row without an argument-limit error', () => {
     const dataset = parseCsv(`name,score\n${'Ada,10\n'.repeat(150_000)}Linus,11,extra`)
     expect(dataset.rows).toHaveLength(150_001)

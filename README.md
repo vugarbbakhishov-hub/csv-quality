@@ -120,7 +120,10 @@ Reads CSV text into `{ headers, rows, delimiter }`. Handles quoted delimiters, e
 
 Options: `delimiter` skips detection, `preserveWhitespace` keeps padding inside cells.
 
-Throws `SyntaxError` on empty input or an unclosed quoted field.
+Throws `SyntaxError` on empty input or malformed quoting: an unclosed field,
+a quote inside unquoted text, or non-whitespace text after a closing quote.
+Spaces/tabs around quoted fields remain supported. Quote-position errors use
+one-based JavaScript string offsets after removal of a leading BOM.
 
 Since v0.4.0, explicit empty records such as `,` or `""` are
 preserved and included in completeness and duplicate counts. Plain blank
