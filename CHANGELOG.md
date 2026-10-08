@@ -6,6 +6,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Fixed
+
+- Classify leading-zero codes and hexadecimal/binary/octal literals as text;
+  numeric inference accepts finite decimal and scientific notation.
+- Reject impossible calendar dates before JavaScript date normalization,
+  including invalid leap days. Stored cell values are never converted.
+
 ## [0.4.1] - 2026-09-29
 
 ### Fixed

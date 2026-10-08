@@ -3,6 +3,20 @@ import { analyzeCsv, analyzeDataset } from './analyze.js'
 import { parseCsv } from './parse.js'
 
 describe('analyzeCsv', () => {
+  it.each(['00123', '-00123', '0x10', '0b10', '0o10', '2026-02-30', '1900-02-29', '2026-04-31', '2026-02-30T12:00:00Z'])('keeps misleading numeric/date value %s as text', (value) => {
+    const dataset = parseCsv(`value\n${value}\n""`)
+    expect(analyzeDataset(dataset).columns[0]?.type).toBe('text')
+    expect(dataset.rows[0]?.[0]).toBe(value)
+  })
+
+  it.each(['2000-02-29', '2024-02-29', '2026-01-01T00:30:00+04:00'])('recognizes valid calendar date %s', (value) => {
+    expect(analyzeCsv(`date\n${value}\n""`).columns[0]?.type).toBe('date')
+  })
+
+  it('accepts decimal and scientific notation with blank cells', () => {
+    expect(analyzeCsv('number\n0\n-0\n+12\n0.5\n-.5\n12.\n1e3\n-2.5E-2\n""').columns[0]?.type).toBe('number')
+  })
+
   it('counts rows, blanks and exact duplicates', () => {
     const report = analyzeCsv(
       'name,score,active,joined\nAda,10,true,2026-01-02\nAda,10,true,2026-01-02\nLinus,,false,2026-04-03',

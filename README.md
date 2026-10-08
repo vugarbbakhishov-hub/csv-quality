@@ -145,6 +145,11 @@ Return a `CsvQualityReport`:
 
 `type` is one of `number`, `date`, `boolean`, `text` or `empty`, and is decided conservatively: every non-blank value in the column has to fit, otherwise the column is `text`.
 
+Numbers use finite decimal or scientific notation. Leading-zero codes such as
+`00123` and hexadecimal/binary/octal literals remain text. Date inference checks
+the written calendar date (including leap years) before parsing optional time
+information, so `2026-02-30` remains text. These labels never convert cell values.
+
 ### `toCsvReport(report, meta?)`, `toJsonReport(report, meta?)` and `toMarkdownReport(report, meta?)`
 
 Render the report. The CSV form is a summary block, a blank line, then one row per column — it opens directly in a spreadsheet. The JSON form carries the same numbers in a nested shape and is easier to read from a script. The Markdown form includes a compact summary and a GitHub-flavored table for pull requests and CI job summaries. `meta` takes `source` and `generatedAt`.
