@@ -100,7 +100,7 @@ export function toJsonReport(report: CsvQualityReport, meta: ReportMeta = {}): s
 export function escapeMarkdownValue(value: string | number): string {
   return String(value)
     .replace(/\\/g, '\\\\')
-    .replace(/\r?\n/g, ' ')
+    .replace(/\r\n|[\r\n]/g, ' ')
     .replace(/\|/g, '\\|')
     .replace(/([*_`\[\]<>])/g, '\\$1')
 }
@@ -118,7 +118,7 @@ export function toMarkdownReport(report: CsvQualityReport, meta: ReportMeta = {}
     '# CSV quality report',
     '',
     `- **Source:** ${escapeMarkdownValue(source)}`,
-    `- **Generated:** ${generatedAt}`,
+    `- **Generated:** ${escapeMarkdownValue(generatedAt)}`,
     `- **Delimiter:** ${delimiterNames[report.delimiter]}`,
     `- **Data rows:** ${report.rowCount}`,
     `- **Columns:** ${report.columnCount}`,

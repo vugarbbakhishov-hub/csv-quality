@@ -89,6 +89,22 @@ describe('toJsonReport', () => {
 })
 
 describe('toMarkdownReport', () => {
+  it.each(['\r', '\n', '\r\n'])('keeps %j line breaks in column names inside one table row', (newline) => {
+    const input = analyzeCsv(`"team${newline}name"\nCore`)
+    const markdown = toMarkdownReport(input, { ...meta, source: `one${newline}two.csv` })
+    expect(markdown).toContain('| team name | text | 1 | 0 | 1 | 100% |')
+    expect(markdown).toContain('- **Source:** one two.csv')
+    expect(markdown).not.toContain('\r')
+    expect(markdown.split('\n').filter((line) => line.startsWith('|'))).toHaveLength(3)
+  })
+
+  it('escapes caller-provided generated metadata as inline text', () => {
+    const generatedAt = 'custom\r\n[link](https://example.com) <b>bold</b> | *note*'
+    const markdown = toMarkdownReport(report, { ...meta, generatedAt })
+    expect(markdown).toContain('- **Generated:** custom \\[link\\](https://example.com) \\<b\\>bold\\</b\\> \\| \\*note\\*\n')
+    expect(JSON.parse(toJsonReport(report, { ...meta, generatedAt })).generatedAt).toBe(generatedAt)
+  })
+
   it('writes a summary and a GitHub-flavored column table', () => {
     const markdown = toMarkdownReport(report, meta)
 
