@@ -7,6 +7,23 @@ import { parseArgs, run, savedReportPath } from './cli.js'
 
 afterEach(() => vi.restoreAllMocks())
 
+it.each([
+  [199, 200, '100', 1],
+  [159, 200, '80', 1],
+  [159, 200, '79.5', 0],
+  [2, 3, '66.8', 1],
+  [2, 3, '66.5', 0],
+  [0, 0, '100', 0],
+] as const)('checks unrounded completeness for %i/%i at %s%%', async (filled, total, threshold, exitCode) => {
+  const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+  const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+  const csv = 'value\n' + Array.from({ length: total }, (_, i) => i < filled ? String(i + 1) : '""').join('\n')
+  expect(await run(['-', '--json', '--min-completeness', threshold], Readable.from([csv]))).toBe(exitCode)
+  expect(JSON.parse(stdout.mock.calls.map(([chunk]) => String(chunk)).join('')).summary.rowCount).toBe(total)
+  if (exitCode === 1) expect(stderr.mock.calls.flat().join('')).toContain('below required')
+  else expect(stderr).not.toHaveBeenCalled()
+})
+
 describe('parseArgs', () => {
   it('reads the file name and flags in any order', () => {
     expect(parseArgs(['data.csv', '--json'])).toEqual({

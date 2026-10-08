@@ -82,6 +82,11 @@ npx csv-quality people.csv \
 The report is still written, so the failed job keeps the exact numbers that
 explain why the CSV did not pass.
 
+Completeness gates compare cell counts before rounding. For example, 199 filled
+cells out of 200 fail `--min-completeness 100`, although the whole-number report
+percentage displays 100%. The failure message shows the unrounded percentage.
+Header-only inputs retain 100% completeness; use the row count to check for data.
+
 Send the Markdown report straight to a GitHub Actions job summary:
 
 ```bash

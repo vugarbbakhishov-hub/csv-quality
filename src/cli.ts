@@ -150,10 +150,14 @@ export async function run(argv: string[], input: Readable = process.stdin): Prom
     }
 
     const failures: string[] = []
+    const totalCells = report.rowCount * report.columnCount
+    const filledCells = totalCells - report.emptyCellCount
+    const completeness = totalCells === 0 ? 100 : (filledCells / totalCells) * 100
 
-    if (args.minCompleteness !== undefined && report.completenessPercent < args.minCompleteness) {
+    // Compare counts before presentation rounding; a 100% gate requires every cell.
+    if (args.minCompleteness !== undefined && totalCells > 0 && filledCells * 100 < args.minCompleteness * totalCells) {
       failures.push(
-        `Completeness ${report.completenessPercent}% is below required ${args.minCompleteness}%.`,
+        `Completeness ${completeness}% is below required ${args.minCompleteness}%.`,
       )
     }
 
