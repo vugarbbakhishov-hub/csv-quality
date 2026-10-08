@@ -1,5 +1,5 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
+import { readFile, stat, writeFile } from 'node:fs/promises'
+import { basename, dirname, join, resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import { analyzeCsv } from './analyze.js'
 import { reportFileName, toCsvReport, toJsonReport, toMarkdownReport } from './report.js'
@@ -113,6 +113,19 @@ async function readStandardInput(input: Readable): Promise<string> {
   return text
 }
 
+async function isInputFile(source: string, target: string): Promise<boolean> {
+  if (resolve(source) === resolve(target)) return true
+  const sourceInfo = await stat(source, { bigint: true })
+  try {
+    // stat follows symlinks; device/inode also detects hard-link aliases.
+    const targetInfo = await stat(target, { bigint: true })
+    return sourceInfo.dev === targetInfo.dev && sourceInfo.ino === targetInfo.ino
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false
+    throw error
+  }
+}
+
 export async function run(argv: string[], input: Readable = process.stdin): Promise<number> {
   let args: Args
 
@@ -143,6 +156,9 @@ export async function run(argv: string[], input: Readable = process.stdin): Prom
     const target = args.out ?? (args.save ? savedReportPath(args.file, extension) : undefined)
 
     if (target) {
+      if (args.file !== '-' && await isInputFile(args.file, target)) {
+        throw new Error('Refusing to overwrite the input CSV. Choose a different --out path.')
+      }
       await writeFile(target, body)
       process.stdout.write(`Wrote ${target}\n`)
     } else {

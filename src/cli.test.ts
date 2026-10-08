@@ -1,11 +1,33 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Readable } from 'node:stream'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { link, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseArgs, run, savedReportPath } from './cli.js'
 
 afterEach(() => vi.restoreAllMocks())
+
+it.each(['same', 'normalized', 'hardlink'])('preserves the input when output is the %s file', async (mode) => {
+  const directory = await mkdtemp(join(tmpdir(), 'csv-quality-'))
+  const source = join(directory, 'source.csv')
+  const original = 'name,score\nAda,10\n'
+  const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+  const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+  try {
+    await writeFile(source, original)
+    let target = mode === 'normalized' ? directory + '/./source.csv' : source
+    if (mode === 'hardlink') {
+      target = join(directory, 'alias.csv')
+      await link(source, target)
+    }
+    expect(await run([source, '--json', '--out', target])).toBe(1)
+    expect(await readFile(source, 'utf8')).toBe(original)
+    expect(stdout).not.toHaveBeenCalled()
+    expect(stderr.mock.calls.flat().join('')).toContain('overwrite the input')
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
 
 it.each([
   [199, 200, '100', 1],

@@ -87,6 +87,12 @@ cells out of 200 fail `--min-completeness 100`, although the whole-number report
 percentage displays 100%. The failure message shows the unrounded percentage.
 Header-only inputs retain 100% completeness; use the row count to check for data.
 
+For file input, `--out` must identify a different file. The CLI checks normalized
+paths and existing file identities before writing, including link aliases, and
+returns exit code 1 if output would overwrite the input. This check is not a
+lock against concurrent filesystem changes. With stdin, the CLI cannot identify
+the file another process may be reading; choose the output path accordingly.
+
 Send the Markdown report straight to a GitHub Actions job summary:
 
 ```bash

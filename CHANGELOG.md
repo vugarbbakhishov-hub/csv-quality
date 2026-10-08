@@ -8,6 +8,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Refuse report output targeting the input file, including normalized paths and
+  existing file aliases, before writing. Return exit code 1 with a clear error.
+
 - Check CLI completeness gates before percentage rounding. A 99.5% complete
   input no longer passes a 100% gate; diagnostics show the unrounded percentage.
   Exported whole-number percentages and header-only input behavior are unchanged.
