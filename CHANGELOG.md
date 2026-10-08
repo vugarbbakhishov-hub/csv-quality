@@ -6,6 +6,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## [0.4.2] - 2026-10-08
+
 ### Fixed
 
 - Keep CR-only line breaks inside a single Markdown table row and escape

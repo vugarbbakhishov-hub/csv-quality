@@ -7,12 +7,12 @@ No dependencies. Works in Node and in the browser. Ships a command-line tool.
 ## Install
 
 The package has not been published to the npm registry yet. Download
-`csv-quality-0.4.1.tgz` from the
-[v0.4.1 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.1),
+`csv-quality-0.4.2.tgz` from the
+[v0.4.2 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.2),
 then install that verified package locally:
 
 ```bash
-npm install ./csv-quality-0.4.1.tgz
+npm install ./csv-quality-0.4.2.tgz
 ```
 
 The commands below use this locally installed package. Registry publication
