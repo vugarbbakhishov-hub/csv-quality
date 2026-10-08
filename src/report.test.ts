@@ -13,6 +13,26 @@ const report = analyzeCsv('name,score,active\nAda,10,true\nAda,10,true\nLinus,,f
 const meta = { source: 'people.csv', generatedAt: '2026-09-15T08:00:00.000Z' }
 
 describe('toCsvReport', () => {
+  it.each(['=1+1', '+1', '-1', '@SUM(1)', '  =1', '\ttext', '\rtext', '\ntext', '＝1', '＋1', '－1', '＠SUM(1)'])('prefixes formula-like report text %j without changing other formats', (value) => {
+    const input = analyzeCsv('name\nAda')
+    input.columns[0]!.name = value
+    const metadata = { source: value, generatedAt: value }
+    const cell = `"'${value}"`
+    const csv = toCsvReport(input, metadata)
+    expect(csv).toContain(`Source,${cell}\nGenerated,${cell}`)
+    expect(csv).toContain(`${cell},text,1,0,1,100`)
+    expect(JSON.parse(toJsonReport(input, metadata)).columns[0].name).toBe(value)
+    expect(toMarkdownReport(input, metadata)).toContain(`| ${escapeMarkdownValue(value)} | text |`)
+  })
+
+  it('quotes report text after prefixing while preserving the public CSV escaping helper', () => {
+    const input = analyzeCsv('name\nAda')
+    const value = '=1,"quoted"\nnext'
+    expect(toCsvReport(input, { source: value })).toContain('Source,"\'=1,""quoted""\nnext"')
+    expect(escapeCsvValue('=1+1')).toBe('=1+1')
+    expect(escapeCsvValue(-1)).toBe('-1')
+  })
+
   it('writes a summary block, a blank line, then the column profile', () => {
     const lines = toCsvReport(report, meta).split('\n')
     const blank = lines.indexOf('')

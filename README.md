@@ -164,6 +164,15 @@ It reads a CSV and describes it. It does not fix, clean, or validate against a s
 
 Type inference is deliberately cautious. A column of `1`, `2`, `N/A` is `text`, not a number column with a bad value, because guessing the other way hides the problem you opened the file to find.
 
+CSV reports prefix formula-like text cells with an apostrophe and quote them.
+This covers leading `=`, `+`, `-`, `@` and full-width variants (also after
+whitespace), plus leading tabs and line breaks. Numeric cells are unchanged.
+Use JSON for exact metadata and column names without this prefix. Spreadsheet
+import settings and saving/reopening CSV can affect the mitigation; it is not a
+universal guarantee. See [OWASP CSV Injection](https://community.owasp.org/attacks/CSV_Injection).
+The public `escapeCsvValue` helper only escapes CSV syntax; it does not add this
+report-specific prefix. Markdown output is unchanged.
+
 ## Development
 
 ```bash

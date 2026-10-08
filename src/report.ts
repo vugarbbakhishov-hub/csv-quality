@@ -22,7 +22,13 @@ export function escapeCsvValue(value: string | number): string {
 }
 
 function toRow(values: Array<string | number>): string {
-  return values.map(escapeCsvValue).join(',')
+  return values.map((value) => {
+    // Report-only policy: keep the public CSV syntax helper lossless.
+    if (typeof value === 'string' && (/^[\t\r\n]/.test(value) || /^\s*[=+\-@＝＋－＠]/u.test(value))) {
+      return `"'${value.replace(/"/g, '""')}"`
+    }
+    return escapeCsvValue(value)
+  }).join(',')
 }
 
 function resolve(meta: ReportMeta) {

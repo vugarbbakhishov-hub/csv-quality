@@ -8,6 +8,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Prefix and quote formula-like text in CSV reports, including source names,
+  generated metadata and column names. JSON, Markdown and the public
+  `escapeCsvValue` syntax helper retain their existing behavior.
+
 - Classify leading-zero codes and hexadecimal/binary/octal literals as text;
   numeric inference accepts finite decimal and scientific notation.
 - Reject impossible calendar dates before JavaScript date normalization,
