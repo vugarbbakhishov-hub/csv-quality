@@ -6,23 +6,29 @@ No dependencies. Works in Node and in the browser. Ships a command-line tool.
 
 ## Install
 
-The package has not been published to the npm registry yet. Download
-`csv-quality-0.4.2.tgz` from the
-[v0.4.2 release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.2),
-then install that verified package locally:
+Requires Node.js 20 or newer. Install the built package directly from the
+[v0.4.3 GitHub release](https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.3):
 
 ```bash
-npm install ./csv-quality-0.4.2.tgz
+npm install https://github.com/vugarbbakhishov-hub/csv-quality/releases/download/v0.4.3/csv-quality-0.4.3.tgz
 ```
 
-The commands below use this locally installed package. Registry publication
-is separate from the GitHub release.
+Alternatively, download `csv-quality-0.4.3.tgz` and run
+`npm install ./csv-quality-0.4.3.tgz`. The release includes `SHA256SUMS.txt`
+to check the downloaded archive.
+
+The package has not been published to the npm registry. Install the release
+above before using the commands below; run them from the same project directory.
 
 ## Use it as a library
 
 ```js
 import { analyzeCsv, toCsvReport } from 'csv-quality'
 
+const csvText = `name,score,active
+Ada,10,true
+Ben,,false
+Ada,10,true`
 const report = analyzeCsv(csvText)
 
 report.rowCount            // 3
@@ -116,8 +122,9 @@ buffered in memory, just like file input; this is not a streaming parser.
 Quality gates work with pipes and still write the report before returning a
 failure exit code. An empty stream returns an error.
 
-The repository's CI runs the sample export on Node 20, 22 and 24 and appends
-the Markdown result to each GitHub Actions job summary:
+The repository's CI runs the sample export on Linux with Node 20, 22 and 24,
+and on Windows and macOS with Node 24. It appends the Markdown result to each
+GitHub Actions job summary:
 
 ```bash
 node examples/export-people.mjs | node dist/esm/bin.js - --markdown --min-completeness 100 --max-duplicate-rows 0 >> "$GITHUB_STEP_SUMMARY"
@@ -190,7 +197,7 @@ report-specific prefix. Markdown output is unchanged.
 ## Development
 
 ```bash
-npm install
+npm ci
 npm test
 npm run typecheck
 npm run build
