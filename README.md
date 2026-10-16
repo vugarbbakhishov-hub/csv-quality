@@ -4,6 +4,9 @@ Inspect a CSV before you trust it. `csv-quality` reads the file, tells you how m
 
 No dependencies. Works in Node and in the browser. Ships a command-line tool.
 
+Prefer to try a browser interface first? Open the companion
+[Local CSV Lens demo](https://vugarbbakhishov-hub.github.io/local-csv-lens/).
+
 ## Install
 
 Requires Node.js 20 or newer. Install the built package directly from the
@@ -42,9 +45,24 @@ const csv = toCsvReport(report, { source: 'people.csv' })
 
 ## Use it from the command line
 
+After installing the package above, save this fictional data as `people.csv`
+in the same project directory:
+
+```csv
+name,score,active
+Ada,10,true
+Ben,,false
+Ada,10,true
+```
+
+Run the following command in that directory. These single-line commands work
+in PowerShell, Bash and Zsh:
+
 ```bash
 npx csv-quality people.csv
 ```
+
+Expected output (the generated timestamp will be different):
 
 ```
 CSV quality report
@@ -52,17 +70,19 @@ Source,people.csv
 Generated,2026-09-15T14:31:25.428Z
 Delimiter,Comma
 Data rows,3
-Columns,4
-Empty cells,2
+Columns,3
+Empty cells,1
 Duplicate rows,1
-Completeness (%),83
+Completeness (%),89
 
 Column,Type,Filled,Empty,Unique,Fill rate (%)
 name,text,3,0,2,100
-team,text,3,0,2,100
-score,number,1,2,1,33
-joined,date,3,0,2,100
+score,number,2,1,1,67
+active,boolean,3,0,2,100
 ```
+
+Save a JSON report beside the input with `npx csv-quality people.csv --json --save`.
+Open the resulting `people-report.json` to see the same summary.
 
 | Option | What it does |
 | --- | --- |
@@ -78,15 +98,28 @@ Use the quality gate options in CI when an export should fail the job if too
 many cells are blank or if duplicate rows are not allowed:
 
 ```bash
-npx csv-quality people.csv \
-  --json \
-  --out quality-report.json \
-  --min-completeness 95 \
-  --max-duplicate-rows 0
+npx csv-quality people.csv --json --out quality-report.json --min-completeness 95 --max-duplicate-rows 0
 ```
 
 The report is still written, so the failed job keeps the exact numbers that
 explain why the CSV did not pass.
+
+With the sample above, this command intentionally exits with code `1`: one cell
+is empty and one row is duplicated. To try a passing gate with the same data:
+
+```bash
+npx csv-quality people.csv --json --min-completeness 80 --max-duplicate-rows 1
+```
+
+Check the exit code immediately after a command with `echo $LASTEXITCODE` in
+PowerShell or `echo $?` in Bash/Zsh. A report without gates describes the data
+and exits successfully even when it contains missing or duplicate values.
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | Report written and any requested gates passed; also `--help` |
+| `1` | A quality gate failed, or reading, parsing or writing failed; check stderr |
+| `2` | Missing input argument or invalid command-line options |
 
 Completeness gates compare cell counts before rounding. For example, 199 filled
 cells out of 200 fail `--min-completeness 100`, although the whole-number report
@@ -201,7 +234,13 @@ npm ci
 npm test
 npm run typecheck
 npm run build
+npm run test:package
 ```
+
+`test:package` requires a completed build. It packs the archive, installs it in
+an isolated temporary project, and checks ESM/CommonJS imports, declaration
+files, the installed CLI, saved reports, and passing/failing gates using the
+README sample. CI runs this on every supported OS/Node matrix entry.
 
 ## Contributing
 

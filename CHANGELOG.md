@@ -6,6 +6,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Maintenance
+
+- Make the CLI quickstart self-contained with fictional input, matching output,
+  saved reports, passing/failing gate examples and exit-code guidance.
+- Verify the packed package in an isolated consumer project on every CI platform:
+  ESM/CommonJS imports, declaration files, installed CLI and README sample reports.
+
 ## [0.4.3] - 2026-10-16
 
 ### Fixed
