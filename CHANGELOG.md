@@ -6,6 +6,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## [0.4.3] - 2026-10-16
+
 ### Fixed
 
 - Refuse report output targeting the input file, including normalized paths and
@@ -18,6 +20,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Reject quotes inside unquoted text and non-whitespace text after a closing
   quote instead of silently joining fragments. Errors identify the character
   position. Spaces/tabs around quoted fields remain supported.
+
+### Maintenance
+
+- Run CI on Windows and macOS with Node 24 alongside Linux on Node 20, 22 and 24.
+- Update the development-only `source-map-js` dependency to patched version 1.2.2.
+- Document direct installation from the GitHub release and provide a complete
+  library quickstart example. The package is not published to the npm registry.
 
 ## [0.4.2] - 2026-10-08
 
@@ -106,3 +115,6 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 [0.2.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.2.0
 [0.3.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.3.0
 [0.4.0]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.0
+[0.4.1]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.1
+[0.4.2]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.2
+[0.4.3]: https://github.com/vugarbbakhishov-hub/csv-quality/releases/tag/v0.4.3
