@@ -13,7 +13,7 @@ Thanks for helping improve `csv-quality`.
 
 1. Keep the change focused on one behavior.
 2. Add or update a test when parsing, analysis, reporting or CLI behavior changes.
-3. Run `npm test`, `npm run typecheck` and `npm run build`.
+3. Run `npm test`, `npm run typecheck`, `npm run build`, then `npm run test:package`.
 4. Explain the user-visible result and any remaining limits.
 
 Please do not submit real private data in issues, tests or fixtures.

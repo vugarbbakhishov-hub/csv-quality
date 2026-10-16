@@ -50,6 +50,7 @@
     "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/finish-build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:package": "node scripts/check-package.mjs",
     "test:watch": "vitest watch",
     "prepublishOnly": "npm run test && npm run build"
   },
