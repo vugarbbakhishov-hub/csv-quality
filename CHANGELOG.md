@@ -6,6 +6,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Security
+
+- Update the development-only Vitest and Vite toolchain to patched releases.
+  The updated lockfile reports no known vulnerabilities in `npm audit` as of
+  2026-10-29. The published library and CLI still have no runtime dependencies.
+
 ### Maintenance
 
 - Make the CLI quickstart self-contained with fictional input, matching output,
