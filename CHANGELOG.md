@@ -14,6 +14,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Maintenance
 
+- Use Node.js 24-based checkout and setup actions while retaining the library's
+  Node.js 20/22/24 and Linux/Windows/macOS compatibility matrix.
 - Make the CLI quickstart self-contained with fictional input, matching output,
   saved reports, passing/failing gate examples and exit-code guidance.
 - Verify the packed package in an isolated consumer project on every CI platform:
